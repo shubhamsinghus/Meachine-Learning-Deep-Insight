@@ -8,8 +8,7 @@ Instead of long theory dumps, this project focuses on **intuition + visuals + in
 ---
 
 ## 🚀 Live Demo
-
-👉 https://shubhamsinghus.github.io/Meachine-Learning-Deep-Insight/
+https://github.com/shubhamsinghus/Meachine-Learning-Deep-Insight
 
 ---
 
@@ -73,7 +72,8 @@ This helps visualize what "training a model" actually means.
 
 ```bash
 git clone https://github.com/shubhamsinghus/Meachine-Learning-Deep-Insight.git
-cd ml-visual-explainer
+cd Meachine-Learning-Deep-Insight
+
 ```
 
 Then open:
