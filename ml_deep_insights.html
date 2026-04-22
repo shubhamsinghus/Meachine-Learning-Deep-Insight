@@ -1,0 +1,996 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Machine Learning — Deep Insights</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#f7f5f0;
+  --surface:#ffffff;
+  --surface2:#f0ede6;
+  --border:#e2ddd6;
+  --text:#1a1814;
+  --muted:#7a7268;
+  --accent:#1a3a2a;
+  --accent2:#2d6a4f;
+  --highlight:#d4a843;
+  --red:#c0392b;
+  --blue:#1a3a5c;
+  
+  --purple:#4a2d7a;
+  --serif:'Playfair Display',Georgia,serif;
+  --sans:'IBM Plex Sans',system-ui,sans-serif;
+  --mono:'IBM Plex Mono',monospace;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.7;}
+
+/* Layout */
+.sidebar{position:fixed;top:0;left:0;width:240px;height:100vh;background:var(--accent);overflow-y:auto;padding:2rem 0;z-index:100;}
+.main{margin-left:240px;padding:3rem 3.5rem 5rem;max-width:880px;}
+@media(max-width:768px){.sidebar{display:none;}.main{margin-left:0;padding:2rem 1.25rem 4rem;}}
+
+/* Sidebar */
+.sb-logo{padding:0 1.5rem 1.5rem;border-bottom:1px solid rgba(255,255,255,0.1);margin-bottom:1rem;}
+.sb-logo .sb-title{font-family:var(--serif);font-size:1rem;color:#fff;line-height:1.3;}
+.sb-logo .sb-sub{font-family:var(--mono);font-size:10px;color:rgba(255,255,255,0.4);margin-top:4px;letter-spacing:0.08em;}
+.sb-section{padding:0.25rem 0;}
+.sb-section-label{font-family:var(--mono);font-size:9px;letter-spacing:0.15em;color:rgba(255,255,255,0.3);text-transform:uppercase;padding:0.75rem 1.5rem 0.25rem;}
+.sb-link{display:block;padding:0.4rem 1.5rem;font-size:12.5px;color:rgba(255,255,255,0.6);text-decoration:none;transition:all 0.15s;font-family:var(--sans);border-left:2px solid transparent;}
+.sb-link:hover{color:#fff;background:rgba(255,255,255,0.06);}
+.sb-link.active{color:#fff;border-left-color:var(--highlight);background:rgba(255,255,255,0.08);}
+
+/* Chapter header */
+.chapter{margin-bottom:4rem;padding-top:1rem;}
+.ch-eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:0.15em;color:var(--highlight);text-transform:uppercase;margin-bottom:0.5rem;}
+.ch-title{font-family:var(--serif);font-size:clamp(1.8rem,4vw,2.8rem);line-height:1.15;color:var(--text);margin-bottom:1rem;}
+.ch-title em{font-style:italic;color:var(--accent2);}
+.ch-intro{font-size:15.5px;color:var(--muted);line-height:1.8;margin-bottom:2rem;max-width:640px;border-left:3px solid var(--highlight);padding-left:1rem;}
+
+/* Body text */
+.body-text{font-size:14.5px;color:#3a3530;line-height:1.8;margin-bottom:1.25rem;}
+.body-text strong{font-weight:500;color:var(--text);}
+h3.sub{font-family:var(--serif);font-size:1.2rem;font-weight:400;color:var(--text);margin:2rem 0 0.75rem;font-style:italic;}
+h4.label{font-family:var(--mono);font-size:11px;letter-spacing:0.1em;color:var(--muted);text-transform:uppercase;margin:1.5rem 0 0.75rem;}
+
+/* Cards & blocks */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.25rem 1.5rem;margin:1.25rem 0;}
+.card-dark{background:var(--accent);border-radius:12px;padding:1.5rem;margin:1.5rem 0;color:#fff;}
+.card-dark p{color:rgba(255,255,255,0.75);font-size:14px;line-height:1.75;}
+.card-dark .cd-title{font-family:var(--serif);font-size:1.1rem;color:#fff;margin-bottom:0.5rem;}
+.highlight-box{background:#fffbf0;border:1px solid #e8d49a;border-radius:10px;padding:1rem 1.25rem;margin:1.25rem 0;font-size:14px;color:#5a4a1a;line-height:1.7;}
+.highlight-box strong{color:#3a2d0a;font-weight:500;}
+.danger-box{background:#fff5f5;border:1px solid #f5c5c5;border-radius:10px;padding:1rem 1.25rem;margin:1.25rem 0;font-size:14px;color:#7a2020;line-height:1.7;}
+.code-block{background:#1a1814;border-radius:10px;padding:1.25rem 1.5rem;margin:1.25rem 0;font-family:var(--mono);font-size:12.5px;line-height:1.8;overflow-x:auto;}
+.code-block .cm{color:#666;}
+.code-block .ck{color:#c792ea;}
+.code-block .cs{color:#c3e88d;}
+.code-block .cn{color:#f78c6c;}
+.code-block .cf{color:#82aaff;}
+.code-block .cc{color:#89ddff;}
+
+/* Divider */
+.divider{border:none;border-top:1px solid var(--border);margin:2.5rem 0;}
+
+/* Grid layouts */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:1.25rem 0;}
+.three-col{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:1.25rem 0;}
+@media(max-width:600px){.two-col,.three-col{grid-template-columns:1fr;}}
+
+/* Mini card */
+.mini{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem 1.1rem;}
+.mini .m-icon{font-size:20px;margin-bottom:6px;}
+.mini .m-title{font-size:12.5px;font-weight:500;color:var(--text);margin-bottom:4px;}
+.mini .m-body{font-size:12px;color:var(--muted);line-height:1.55;}
+
+/* Flow diagram */
+.flow-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin:1.5rem 0;overflow-x:auto;}
+.flow{display:flex;align-items:flex-start;gap:0;min-width:500px;}
+.flow-node{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;}
+.flow-box{width:calc(100% - 8px);padding:10px 6px;border-radius:8px;text-align:center;font-family:var(--mono);font-size:11px;line-height:1.4;font-weight:500;}
+.fn-green{background:#e8f5ee;color:var(--accent2);border:1px solid #b8ddc8;}
+.fn-blue{background:#e8f0f8;color:var(--blue);border:1px solid #b0c8e0;}
+.fn-red{background:#fdf0ee;color:var(--red);border:1px solid #f0c0b8;}
+.fn-gold{background:#fdf8ea;color:#8a6010;border:1px solid #e8d090;}
+.fn-purple{background:#f0eaf8;color:var(--purple);border:1px solid #c8b0e8;}
+.fn-gray{background:var(--surface2);color:var(--muted);border:1px solid var(--border);}
+.flow-sub{font-size:10px;color:var(--muted);text-align:center;font-family:var(--mono);}
+.flow-arrow{color:var(--border);font-size:20px;padding:0 4px;align-self:flex-start;margin-top:15px;flex-shrink:0;}
+
+/* Neuron diagram - pure CSS/SVG inline */
+.neuron-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin:1.5rem 0;text-align:center;}
+
+/* Table */
+.data-table{width:100%;border-collapse:collapse;margin:1.25rem 0;font-size:13px;}
+.data-table th{background:var(--accent);color:#fff;font-family:var(--mono);font-size:10px;letter-spacing:0.08em;text-transform:uppercase;padding:10px 12px;text-align:left;}
+.data-table td{padding:9px 12px;border-bottom:1px solid var(--border);color:#3a3530;vertical-align:top;line-height:1.55;}
+.data-table tr:hover td{background:var(--surface);}
+.data-table tr:last-child td{border-bottom:none;}
+.badge{display:inline-block;font-family:var(--mono);font-size:10px;padding:2px 8px;border-radius:10px;font-weight:500;}
+.b-green{background:#e0f0e8;color:var(--accent2);}
+.b-blue{background:#e0eaf8;color:var(--blue);}
+.b-orange{background:#fdf0dc;color:#8a5010;}
+.b-purple{background:#f0e8f8;color:var(--purple);}
+.b-red{background:#fdf0ee;color:var(--red);}
+
+/* Interactive gradient descent */
+.gd-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin:1.5rem 0;}
+.gd-controls{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:1rem;}
+.gd-btn{font-family:var(--mono);font-size:11px;padding:7px 16px;border-radius:20px;border:1px solid var(--border);background:var(--surface2);color:var(--text);cursor:pointer;transition:all 0.15s;}
+.gd-btn:hover{background:var(--border);}
+.gd-btn.primary{background:var(--accent);color:#fff;border-color:transparent;}
+.gd-btn.primary:hover{background:var(--accent2);}
+.gd-stat{font-family:var(--mono);font-size:11px;color:var(--muted);}
+.gd-stat span{color:var(--text);font-weight:500;}
+canvas{border-radius:8px;display:block;}
+
+/* Algorithm cards */
+.algo-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:10px;}
+.algo-head{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+.algo-num{width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;flex-shrink:0;}
+.algo-name{font-size:14px;font-weight:500;color:var(--text);}
+.algo-tag{margin-left:auto;}
+.algo-body{font-size:13px;color:var(--muted);line-height:1.6;}
+.algo-body strong{color:var(--text);font-weight:500;}
+.algo-use{font-family:var(--mono);font-size:10px;color:var(--accent2);margin-top:6px;}
+
+/* Attention viz */
+.attention-grid{display:grid;gap:3px;margin:1rem 0;}
+.att-row{display:flex;gap:3px;}
+.att-cell{height:28px;border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:9px;font-weight:500;flex:1;}
+
+/* Timeline */
+.timeline{margin:1.5rem 0;}
+.tl-item{display:flex;gap:1rem;margin-bottom:1.25rem;}
+.tl-left{display:flex;flex-direction:column;align-items:center;gap:0;}
+.tl-dot{width:10px;height:10px;border-radius:50%;background:var(--accent2);flex-shrink:0;margin-top:4px;}
+.tl-line{width:1px;background:var(--border);flex:1;margin:4px auto;}
+.tl-content .tl-year{font-family:var(--mono);font-size:10px;color:var(--highlight);margin-bottom:2px;}
+.tl-content .tl-name{font-size:13.5px;font-weight:500;color:var(--text);margin-bottom:3px;}
+.tl-content .tl-desc{font-size:12.5px;color:var(--muted);line-height:1.55;}
+
+/* Overfitting viz */
+.fit-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:1.25rem 0;}
+.fit-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem;text-align:center;}
+.fit-card canvas{margin:0 auto 8px;}
+.fit-label{font-family:var(--mono);font-size:10px;font-weight:500;margin-bottom:3px;}
+.fit-desc{font-size:11px;color:var(--muted);line-height:1.5;}
+
+/* Progress & TOC */
+.toc{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.25rem 1.5rem;margin-bottom:3rem;}
+.toc-title{font-family:var(--mono);font-size:10px;letter-spacing:0.12em;color:var(--muted);text-transform:uppercase;margin-bottom:1rem;}
+.toc-list{list-style:none;}
+.toc-list li{padding:5px 0;border-bottom:1px solid var(--border);font-size:13px;}
+.toc-list li:last-child{border-bottom:none;}
+.toc-list a{color:var(--muted);text-decoration:none;display:flex;justify-content:space-between;align-items:center;transition:color 0.15s;}
+.toc-list a:hover{color:var(--accent);}
+.toc-list .toc-num{font-family:var(--mono);font-size:10px;color:var(--border);background:var(--surface2);padding:2px 7px;border-radius:8px;}
+
+/* Print friendly section rule */
+@media print{.sidebar{display:none;}.main{margin-left:0;}}
+</style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<nav class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-title">Machine Learning<br>Deep Insights</div>
+    <div class="sb-sub">Complete Reference · 2025</div>
+  </div>
+  <div class="sb-section">
+    <div class="sb-section-label">Foundations</div>
+    <a href="#ch1" class="sb-link active">1. What ML really is</a>
+    <a href="#ch2" class="sb-link">2. Key vocabulary</a>
+    <a href="#ch3" class="sb-link">3. How models learn</a>
+  </div>
+  <div class="sb-section">
+    <div class="sb-section-label">Core mechanics</div>
+    <a href="#ch4" class="sb-link">4. Neural networks</a>
+    <a href="#ch5" class="sb-link">5. Gradient descent</a>
+    <a href="#ch6" class="sb-link">6. Backpropagation</a>
+    <a href="#ch7" class="sb-link">7. Overfitting & bias</a>
+  </div>
+  <div class="sb-section">
+    <div class="sb-section-label">Algorithms</div>
+    <a href="#ch8" class="sb-link">8. Core algorithms</a>
+    <a href="#ch9" class="sb-link">9. Types of ML</a>
+    <a href="#ch10" class="sb-link">10. Deep learning</a>
+  </div>
+  <div class="sb-section">
+    <div class="sb-section-label">Modern AI</div>
+    <a href="#ch11" class="sb-link">11. Transformers & LLMs</a>
+    <a href="#ch12" class="sb-link">12. The ML pipeline</a>
+    <a href="#ch13" class="sb-link">13. Evaluation metrics</a>
+    <a href="#ch14" class="sb-link">14. ML in the real world</a>
+  </div>
+</nav>
+
+<!-- Main content -->
+<main class="main">
+
+  <!-- Cover -->
+  <div style="margin-bottom:3.5rem;padding-top:0.5rem;">
+    <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.15em;color:var(--highlight);text-transform:uppercase;margin-bottom:0.75rem;">Complete Deep Reference</div>
+    <h1 style="font-family:var(--serif);font-size:clamp(2.2rem,5vw,3.8rem);line-height:1.1;color:var(--text);margin-bottom:1rem;">Machine Learning<br><em style="color:var(--accent2);">Deep Insights</em></h1>
+    <p style="font-size:15px;color:var(--muted);line-height:1.8;max-width:580px;margin-bottom:1.5rem;">Everything a serious practitioner needs to understand — from first principles through transformers and LLMs. Built for a tech professional making the pivot to AI.</p>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;">
+      <span class="badge b-green">14 chapters</span>
+      <span class="badge b-blue">Interactive demos</span>
+      <span class="badge b-orange">Code examples</span>
+      <span class="badge b-purple">Visual diagrams</span>
+    </div>
+  </div>
+
+  <!-- TOC -->
+  <div class="toc">
+    <div class="toc-title">Table of contents</div>
+    <ul class="toc-list">
+      <li><a href="#ch1">What ML really is — the inversion of programming <span class="toc-num">01</span></a></li>
+      <li><a href="#ch2">The vocabulary that unlocks everything <span class="toc-num">02</span></a></li>
+      <li><a href="#ch3">How a model actually learns <span class="toc-num">03</span></a></li>
+      <li><a href="#ch4">Neural networks — anatomy and intuition <span class="toc-num">04</span></a></li>
+      <li><a href="#ch5">Gradient descent — the engine of learning <span class="toc-num">05</span></a></li>
+      <li><a href="#ch6">Backpropagation — how error flows backwards <span class="toc-num">06</span></a></li>
+      <li><a href="#ch7">Overfitting, underfitting and the bias-variance tradeoff <span class="toc-num">07</span></a></li>
+      <li><a href="#ch8">Core ML algorithms explained <span class="toc-num">08</span></a></li>
+      <li><a href="#ch9">The three types of ML — supervised, unsupervised, RL <span class="toc-num">09</span></a></li>
+      <li><a href="#ch10">Deep learning — why depth matters <span class="toc-num">10</span></a></li>
+      <li><a href="#ch11">Transformers & LLMs — how ChatGPT and Claude work <span class="toc-num">11</span></a></li>
+      <li><a href="#ch12">The end-to-end ML pipeline <span class="toc-num">12</span></a></li>
+      <li><a href="#ch13">Evaluation metrics — how you know if a model is good <span class="toc-num">13</span></a></li>
+      <li><a href="#ch14">ML in the real world — applications and career map <span class="toc-num">14</span></a></li>
+    </ul>
+  </div>
+
+  <hr class="divider">
+
+  <!-- CH1 -->
+  <div class="chapter" id="ch1">
+    <div class="ch-eyebrow">Chapter 01 · Foundations</div>
+    <h2 class="ch-title">What ML really is — <em>the inversion of programming</em></h2>
+    <p class="ch-intro">Machine learning is not magic. It is a systematic method for finding patterns in data — by optimising numbers, not by writing rules. Understanding this one idea precisely makes everything else coherent.</p>
+
+    <div class="body-text">In traditional software, a human writes <strong>explicit rules</strong>: "if the email contains 'free money', mark it spam." This works for simple problems. But the world is full of problems where the rules are too complex, too numerous, or simply unknown. You cannot write rules that recognise handwriting. You cannot write rules that translate languages. The search space of possible rules is infinite.</div>
+
+    <div class="body-text">Machine learning solves this by flipping the process. Instead of <em>rules → output</em>, you provide <em>examples of inputs + correct outputs</em>, and the algorithm discovers the rules itself. The "rules" it discovers are encoded not as readable code, but as millions of numerical parameters — called weights — inside a mathematical function.</div>
+
+    <div class="two-col">
+      <div class="card">
+        <h4 class="label" style="margin-top:0;">Traditional programming</h4>
+        <div style="font-size:13px;color:var(--muted);line-height:1.7;"><strong style="color:var(--text);">Input:</strong> Rules + Data<br><strong style="color:var(--text);">Output:</strong> Answers<br><br>You define logic. Computer executes it. Breaks the moment reality doesn't fit your rules.</div>
+      </div>
+      <div class="card">
+        <h4 class="label" style="margin-top:0;">Machine learning</h4>
+        <div style="font-size:13px;color:var(--muted);line-height:1.7;"><strong style="color:var(--text);">Input:</strong> Data + Answers<br><strong style="color:var(--text);">Output:</strong> Rules (learned)<br><br>You curate examples. Algorithm discovers logic. Generalises to new cases automatically.</div>
+      </div>
+    </div>
+
+    <div class="highlight-box"><strong>The deep insight:</strong> When you train a model to classify dog photos, it doesn't learn a definition of "dog." It learns to detect edges, then textures, then shapes, then configurations of shapes that correlate with the label "dog." The resulting function is not interpretable — it is emergent. This is both ML's greatest power and its greatest limitation.</div>
+
+    <h3 class="sub">When to use ML and when not to</h3>
+    <div class="body-text">ML is not always the right tool. It is the right tool when: (1) the problem has patterns that are too complex to code manually, (2) you have labelled examples to learn from, and (3) the pattern is consistent enough to generalise. It is the wrong tool when simple rules work, when you have almost no data, or when you need a fully explainable decision process for legal or ethical reasons.</div>
+
+    <table class="data-table">
+      <thead><tr><th>Situation</th><th>Use ML?</th><th>Reason</th></tr></thead>
+      <tbody>
+        <tr><td>Detect spam in email</td><td><span class="badge b-green">Yes</span></td><td>Patterns too complex and numerous to hand-code</td></tr>
+        <tr><td>Calculate sales tax</td><td><span class="badge b-red">No</span></td><td>Simple deterministic rule — just write the formula</td></tr>
+        <tr><td>Recognise faces in photos</td><td><span class="badge b-green">Yes</span></td><td>Pattern lives in pixel space — impossible to hand-code</td></tr>
+        <tr><td>Sort a list of names</td><td><span class="badge b-red">No</span></td><td>Solved problem with exact algorithms, no uncertainty</td></tr>
+        <tr><td>Predict customer churn</td><td><span class="badge b-green">Yes</span></td><td>Complex hidden patterns across multiple behavioural signals</td></tr>
+        <tr><td>Recommend products</td><td><span class="badge b-green">Yes</span></td><td>Patterns in user behaviour are too rich for rule systems</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <hr class="divider">
+
+  <!-- CH2 -->
+  <div class="chapter" id="ch2">
+    <div class="ch-eyebrow">Chapter 02 · Foundations</div>
+    <h2 class="ch-title">The <em>vocabulary</em> that unlocks everything</h2>
+    <p class="ch-intro">Eight terms explain 95% of ML conversations. Master these and research papers, job descriptions, and tool docs become readable.</p>
+
+    <table class="data-table">
+      <thead><tr><th>Term</th><th>What it is</th><th>Analogy</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Dataset</strong></td><td>The collection of examples used for training, validation, and testing.</td><td>A textbook with thousands of practice problems and their answers.</td></tr>
+        <tr><td><strong>Features</strong></td><td>The input variables the model sees. Each row of data has multiple features (columns).</td><td>For a house: size, bedrooms, neighbourhood, age. Each is one feature.</td></tr>
+        <tr><td><strong>Labels</strong></td><td>The correct answer for each example. What the model is learning to predict.</td><td>The answer key at the back of the textbook.</td></tr>
+        <tr><td><strong>Model</strong></td><td>The mathematical function with learnable parameters. It maps features → predictions.</td><td>A blank form with thousands of adjustable dials. Training sets the dials.</td></tr>
+        <tr><td><strong>Weights</strong></td><td>The internal numerical parameters of the model. Training adjusts these to minimise loss.</td><td>The volume knobs inside the model. A neural network may have billions.</td></tr>
+        <tr><td><strong>Loss function</strong></td><td>A mathematical measure of how wrong the model's predictions are. Training minimises this.</td><td>A score that says "you were this far off." Lower is better. Zero is perfect.</td></tr>
+        <tr><td><strong>Training</strong></td><td>The iterative process of feeding data through the model, measuring loss, and updating weights.</td><td>Practising maths problems — make a mistake, understand why, adjust your approach.</td></tr>
+        <tr><td><strong>Inference</strong></td><td>Using a trained model to make predictions on new, unseen data. The "deployment" phase.</td><td>Taking the exam after all the study. The model is now fixed — just answering questions.</td></tr>
+      </tbody>
+    </table>
+
+    <div class="card-dark">
+      <div class="cd-title">How these words connect in one sentence</div>
+      <p>You feed <strong>features</strong> from a <strong>dataset</strong> through a <strong>model</strong>, it makes a prediction, the <strong>loss function</strong> measures how wrong it was, and <strong>training</strong> adjusts the <strong>weights</strong> to reduce that loss — until the model is good enough to use for <strong>inference</strong> on new data.</p>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- CH3 -->
+  <div class="chapter" id="ch3">
+    <div class="ch-eyebrow">Chapter 03 · Foundations</div>
+    <h2 class="ch-title">How a model <em>actually learns</em></h2>
+    <p class="ch-intro">Learning in ML is not inspiration or intuition. It is a precise mechanical loop that runs thousands to millions of times. Each loop is called an iteration or step.</p>
+
+    <div class="flow-wrap">
+      <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;color:var(--muted);text-transform:uppercase;margin-bottom:1.25rem;">The training loop — runs millions of times</div>
+      <div class="flow">
+        <div class="flow-node"><div class="flow-box fn-gray">Sample<br>a batch</div><div class="flow-sub">e.g. 32 rows</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node"><div class="flow-box fn-blue">Forward<br>pass</div><div class="flow-sub">model predicts</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node"><div class="flow-box fn-red">Compute<br>loss</div><div class="flow-sub">how wrong?</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node"><div class="flow-box fn-gold">Backward<br>pass</div><div class="flow-sub">blame weights</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node"><div class="flow-box fn-green">Update<br>weights</div><div class="flow-sub">gradient step</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node"><div class="flow-box fn-purple">Repeat<br>until good</div><div class="flow-sub">epoch loop</div></div>
+      </div>
+    </div>
+
+    <h3 class="sub">Batches, epochs, and iterations</h3>
+    <div class="body-text">Three terms describe the scale of training. A <strong>batch</strong> is a small subset of the dataset processed in one forward pass (e.g. 32 or 64 examples). An <strong>iteration</strong> is one pass through one batch. An <strong>epoch</strong> is one complete pass through the entire training dataset. A model might train for 100 epochs, each containing thousands of iterations.</div>
+
+    <div class="three-col">
+      <div class="mini"><div class="m-title">Batch size</div><div class="m-body">How many examples per step. Smaller = noisier but faster; larger = smoother but slower. Typically 32–256.</div></div>
+      <div class="mini"><div class="m-title">Epoch</div><div class="m-body">One full pass through all training data. Underfitting = too few epochs. Overfitting = too many.</div></div>
+      <div class="mini"><div class="m-title">Learning rate</div><div class="m-body">How big each weight update step is. The single most important hyperparameter. Too high = explodes. Too low = never converges.</div></div>
+    </div>
+
+    <div class="code-block">
+      <span class="cm"># Simplified training loop in PyTorch</span><br>
+      <span class="ck">for</span> epoch <span class="ck">in</span> <span class="cf">range</span>(<span class="cn">100</span>):<br>
+      &nbsp;&nbsp;<span class="ck">for</span> batch <span class="ck">in</span> dataloader:<br>
+      &nbsp;&nbsp;&nbsp;&nbsp;X, y = batch &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm"># features and labels</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;predictions = model(X) &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm"># forward pass</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;loss = loss_fn(predictions, y) <span class="cm"># compute loss</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;loss.backward() &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm"># backpropagation</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;optimizer.step() &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm"># update weights</span><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;optimizer.zero_grad() &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span class="cm"># reset gradients</span>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- CH4 -->
+  <div class="chapter" id="ch4">
+    <div class="ch-eyebrow">Chapter 04 · Core mechanics</div>
+    <h2 class="ch-title">Neural networks — <em>anatomy and intuition</em></h2>
+    <p class="ch-intro">A neural network is a layered mathematical function loosely inspired by the brain. Each layer transforms the data, and together they learn arbitrarily complex patterns.</p>
+
+    <div class="body-text">Every neural network has three types of layers. The <strong>input layer</strong> receives the raw features. <strong>Hidden layers</strong> transform the data through a series of weighted sums and non-linear activations. The <strong>output layer</strong> produces the final prediction — a number, a class, a token.</div>
+
+    <div class="neuron-wrap">
+      <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;color:var(--muted);text-transform:uppercase;margin-bottom:1.25rem;text-align:left;">Anatomy of a single neuron</div>
+      <svg viewBox="0 0 560 160" width="100%" style="max-width:560px;">
+        <!-- Input lines -->
+        <line x1="40" y1="40" x2="200" y2="80" stroke="#c8d8c8" stroke-width="1.5"/>
+        <line x1="40" y1="80" x2="200" y2="80" stroke="#c8d8c8" stroke-width="1.5"/>
+        <line x1="40" y1="120" x2="200" y2="80" stroke="#c8d8c8" stroke-width="1.5"/>
+        <!-- Input nodes -->
+        <circle cx="40" cy="40" r="16" fill="#e8f0f8" stroke="#b0c8e0" stroke-width="1"/>
+        <text x="40" y="44" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#1a3a5c">x₁</text>
+        <circle cx="40" cy="80" r="16" fill="#e8f0f8" stroke="#b0c8e0" stroke-width="1"/>
+        <text x="40" y="84" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#1a3a5c">x₂</text>
+        <circle cx="40" cy="120" r="16" fill="#e8f0f8" stroke="#b0c8e0" stroke-width="1"/>
+        <text x="40" y="124" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#1a3a5c">x₃</text>
+        <!-- Weight labels -->
+        <text x="105" y="56" font-family="IBM Plex Mono,monospace" font-size="9" fill="#d4a843">w₁</text>
+        <text x="108" y="78" font-family="IBM Plex Mono,monospace" font-size="9" fill="#d4a843">w₂</text>
+        <text x="105" y="106" font-family="IBM Plex Mono,monospace" font-size="9" fill="#d4a843">w₃</text>
+        <!-- Neuron body -->
+        <circle cx="240" cy="80" r="36" fill="#e8f5ee" stroke="#2d6a4f" stroke-width="1.5"/>
+        <text x="240" y="75" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#1a3a2a">Σ(wᵢxᵢ)+b</text>
+        <text x="240" y="88" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="8" fill="#1a3a2a">activation</text>
+        <!-- Output arrow -->
+        <line x1="276" y1="80" x2="360" y2="80" stroke="#2d6a4f" stroke-width="1.5" marker-end="url(#arr)"/>
+        <defs><marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L0,6 L8,3 z" fill="#2d6a4f"/></marker></defs>
+        <!-- Output -->
+        <circle cx="390" cy="80" r="22" fill="#f0eaf8" stroke="#4a2d7a" stroke-width="1"/>
+        <text x="390" y="84" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#4a2d7a">output</text>
+        <!-- Bias -->
+        <rect x="210" y="122" width="60" height="20" rx="4" fill="#fdf8ea" stroke="#e8d090"/>
+        <text x="240" y="135" text-anchor="middle" font-family="IBM Plex Mono,monospace" font-size="9" fill="#8a6010">+ bias b</text>
+        <line x1="240" y1="122" x2="240" y2="116" stroke="#e8d090" stroke-width="1"/>
+      </svg>
+      <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:0.75rem;justify-content:center;">
+        <div style="font-size:11px;color:var(--muted);"><span style="color:var(--blue);font-weight:500;">xᵢ</span> = inputs (features)</div>
+        <div style="font-size:11px;color:var(--muted);"><span style="color:var(--highlight);font-weight:500;">wᵢ</span> = weights (learned)</div>
+        <div style="font-size:11px;color:var(--muted);"><span style="color:#8a6010;font-weight:500;">b</span> = bias (learned)</div>
+        <div style="font-size:11px;color:var(--muted);"><span style="color:var(--accent2);font-weight:500;">activation</span> = non-linearity</div>
+      </div>
+    </div>
+
+    <h3 class="sub">Activation functions — the non-linearity that makes depth useful</h3>
+    <div class="body-text">Without activation functions, stacking multiple layers is mathematically equivalent to a single layer. Activations introduce non-linearity, which allows networks to approximate any function. Three dominate modern practice:</div>
+
+    <table class="data-table">
+      <thead><tr><th>Activation</th><th>Formula</th><th>Behaviour</th><th>Used where</th></tr></thead>
+      <tbody>
+        <tr><td><strong>ReLU</strong></td><td><code style="font-family:var(--mono);font-size:12px;">max(0, x)</code></td><td>Zero for negatives, linear for positives. Fast, simple.</td><td>Hidden layers in most modern networks</td></tr>
+        <tr><td><strong>Sigmoid</strong></td><td><code style="font-family:var(--mono);font-size:12px;">1 / (1+e⁻ˣ)</code></td><td>Squashes output to (0,1). Interpretable as probability.</td><td>Binary classification output layers</td></tr>
+        <tr><td><strong>Softmax</strong></td><td><code style="font-family:var(--mono);font-size:12px;">eˣⁱ / Σeˣʲ</code></td><td>Converts logits to probabilities that sum to 1.</td><td>Multi-class classification outputs</td></tr>
+        <tr><td><strong>GELU</strong></td><td><code style="font-family:var(--mono);font-size:12px;">x·Φ(x)</code></td><td>Smooth version of ReLU. Slightly better for language tasks.</td><td>Transformers (GPT, BERT, Claude)</td></tr>
+      </tbody>
+    </table>
+
+    <div class="highlight-box"><strong>Key insight:</strong> "Deep" learning means using many layers (depth). Each layer learns progressively more abstract representations. In vision: layer 1 detects edges, layer 5 detects shapes, layer 20 detects concepts like "dog snout." This hierarchical feature learning is why depth is so powerful.</div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- CH5 -->
+  <div class="chapter" id="ch5">
+    <div class="ch-eyebrow">Chapter 05 · Core mechanics</div>
+    <h2 class="ch-title">Gradient descent — <em>the engine of learning</em></h2>
+    <p class="ch-intro">Gradient descent is the algorithm that makes training possible. It answers the question: given that the model is wrong, how should each weight change to make it less wrong?</p>
+
+    <div class="body-text">Imagine the loss function as a landscape of hills and valleys. The model's current weights are a ball sitting somewhere on that landscape. The goal is to roll the ball to the lowest point — the minimum loss. Gradient descent does this by asking: which direction is downhill? Then it takes a small step in that direction.</div>
+
+    <div class="body-text">Mathematically, the gradient is the derivative of the loss with respect to each weight. It tells you the slope at your current position. A positive gradient for a weight means "increasing this weight increases loss, so decrease it." A negative gradient means "decrease this weight to increase loss, so increase it." You step in the opposite direction of the gradient.</div>
+
+    <div class="gd-wrap" id="gdDemo">
+      <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;color:var(--muted);text-transform:uppercase;margin-bottom:1rem;">Interactive — gradient descent on a loss landscape</div>
+      <div class="gd-controls">
+        <button class="gd-btn primary" id="gdStepBtn" onclick="gdStep()">One step</button>
+        <button class="gd-btn" id="gdAutoBtn" onclick="gdToggleAuto()">Auto descend</button>
+        <button class="gd-btn" onclick="gdReset()">Reset</button>
+        <div class="gd-stat">Step: <span id="gdIter">0</span> &nbsp;|&nbsp; Loss: <span id="gdLoss">—</span> &nbsp;|&nbsp; Position: <span id="gdPos">—</span></div>
+      </div>
+      <canvas id="gdCanvas" height="220" style="width:100%;background:#fafaf7;border:1px solid var(--border);"></canvas>
+      <div style="display:flex;gap:16px;margin-top:0.75rem;flex-wrap:wrap;">
+        <div style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px;"><span style="display:inline-block;width:12px;height:3px;background:#2d6a4f;"></span>Loss curve</div>
+        <div style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px;"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#c0392b;"></span>Current position</div>
+        <div style="font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px;"><span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:rgba(200,180,100,0.4);border:1px solid #d4a843;"></span>Trail</div>
+      </div>
+    </div>
+
+    <h3 class="sub">The three variants of gradient descent</h3>
+    <table class="data-table">
+      <thead><tr><th>Variant</th><th>Batch size</th><th>Speed</th><th>Stability</th><th>Used in practice</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Batch GD</strong></td><td>Full dataset</td><td>Slow</td><td>Very stable</td><td>Rarely — too slow for large datasets</td></tr>
+        <tr><td><strong>Stochastic GD</strong></td><td>1 example</td><td>Very fast</td><td>Noisy/erratic</td><td>Online learning, some NLP tasks</td></tr>
+        <tr><td><strong>Mini-batch GD</strong></td><td>32–256</td><td>Fast</td><td>Good balance</td><td>Standard in deep learning — what everyone uses</td></tr>
+      </tbody>
+    </table>
+
+    <h3 class="sub">Adam — the optimiser that made mini-batch GD great</h3>
+    <div class="body-text">Vanilla gradient descent uses the same learning rate for every weight. Adam (Adaptive Moment Estimation) gives each weight its own adaptive learning rate based on recent gradient history. It is the default optimiser for most deep learning tasks and is why you rarely need to tune the learning rate much in practice.</div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- CH6 -->
+  <div class="chapter" id="ch6">
+    <div class="ch-eyebrow">Chapter 06 · Core mechanics</div>
+    <h2 class="ch-title">Backpropagation — <em>how error flows backwards</em></h2>
+    <p class="ch-intro">Backpropagation is the algorithm that computes how much each weight contributed to the loss — so gradient descent knows exactly how to adjust each one. Without it, training a deep network would be computationally infeasible.</p>
+
+    <div class="body-text">The forward pass computes a prediction. The backward pass asks: if I change weight W by a tiny amount, how much does the loss change? This is computed using the chain rule of calculus, applied backwards through every layer of the network. The result is a gradient for every single weight — which is then used by the optimiser to update them.</div>
+
+    <div class="card-dark">
+      <div class="cd-title">The chain rule in plain English</div>
+      <p>If the final loss depends on layer 3, and layer 3 depends on layer 2, and layer 2 depends on a weight W, then the effect of W on loss = (effect of W on layer 2) × (effect of layer 2 on layer 3) × (effect of layer 3 on loss). Backprop automates this multiplication across all layers simultaneously. PyTorch and TensorFlow compute this for you with <code style="font-family:var(--mono);background:rgba(255,255,255,0.1);padding:1px 5px;border-radius:3px;">loss.backward()</code>.</p>
+    </div>
+
+    <div class="highlight-box"><strong>Why this matters for you as an engineer:</strong> You almost never implement backprop manually — deep learning frameworks do it automatically. But understanding what it does (distribute blame for errors back to each weight) helps you debug training failures. If gradients become zero (vanishing gradient) or astronomically large (exploding gradient), training breaks. Understanding backprop is how you diagnose these.</div>
+
+    <h3 class="sub">Vanishing and exploding gradients</h3>
+    <div class="body-text">In deep networks, gradients are multiplied as they travel backwards through layers. If each multiplication makes them slightly smaller (common with sigmoid activations), they become nearly zero by the time they reach early layers — those layers stop learning. This is the <strong>vanishing gradient problem</strong>. The <strong>exploding gradient problem</strong> is the opposite — gradients grow exponentially and destabilise training. Modern solutions include: ReLU activations (reduces vanishing), residual connections (skip connections in ResNets), layer normalisation, and gradient clipping.</div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- CH7 -->
+  <div class="chapter" id="ch7">
+    <div class="ch-eyebrow">Chapter 07 · Core mechanics</div>
+    <h2 class="ch-title">Overfitting, underfitting and <em>the bias-variance tradeoff</em></h2>
+    <p class="ch-intro">The central challenge of ML is not making a model that performs well on training data — that is easy. The challenge is making a model that generalises to new, unseen data. This is where most real-world ML projects fail.</p>
+
+    <div class="fit-row">
+      <div class="fit-card">
+        <canvas id="fitUnder" width="160" height="120"></canvas>
+        <div class="fit-label" style="color:var(--red);">Underfitting</div>
+        <div class="fit-desc">Model too simple. Misses even the obvious pattern. High error on both training and test data.</div>
+      </div>
+      <div class="fit-card">
+        <canvas id="fitGood" width="160" height="120"></canvas>
+        <div class="fit-label" style="color:var(--accent2);">Good fit</div>
+        <div class="fit-desc">Model captures the underlying pattern. Low training error. Generalises well to new data.</div>
+      </div>
+      <div class="fit-card">
+        <canvas id="fitOver" width="160" height="120"></canvas>
+        <div class="fit-label" style="color:var(--red);">Overfitting</div>
+        <div class="fit-desc">Model memorised training data including noise. Performs terribly on any new data.</div>
+      </div>
+    </div>
+
+    <h3 class="sub">The bias-variance tradeoff</h3>
+    <div class="body-text"><strong>Bias</strong> is error from wrong assumptions — the model is too simple to capture the true pattern (underfitting). <strong>Variance</strong> is error from sensitivity to small fluctuations in training data — the model is too complex and memorises noise (overfitting). You cannot eliminate both simultaneously by simply changing model complexity. The art of ML is navigating this tradeoff.</div>
+
+    <h4 class="label">Regularisation — the solutions to overfitting</h4>
+    <table class="data-table">
+      <thead><tr><th>Technique</th><th>What it does</th><th>When to use</th></tr></thead>
+      <tbody>
+        <tr><td><strong>L2 regularisation</strong></td><td>Penalises large weights by adding their squared value to loss. Keeps weights small.</td><td>Default regularisation for most models</td></tr>
+        <tr><td><strong>Dropout</strong></td><td>Randomly zeroes out neurons during training. Forces the network not to rely on any single path.</td><td>Fully connected layers in neural networks</td></tr>
+        <tr><td><strong>Early stopping</strong></td><td>Stop training when validation loss stops improving, before the model overfits.</td><td>Any training loop with a validation set</td></tr>
+        <tr><td><strong>Data augmentation</strong></td><td>Artificially expand training data by transforming existing examples (rotate, crop, flip images).</td><td>Computer vision — whenever data is limited</td></tr>
+        <tr><td><strong>Batch normalisation</strong></td><td>Normalises layer inputs during training. Stabilises learning and acts as mild regulariser.</td><td>Deep networks, often between layers</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <hr class="divider">
+
+  <!-- CH8 -->
+  <div class="chapter" id="ch8">
+    <div class="ch-eyebrow">Chapter 08 · Algorithms</div>
+    <h2 class="ch-title">Core ML <em>algorithms explained</em></h2>
+    <p class="ch-intro">Before deep learning dominated, classical ML algorithms solved (and still solve) a huge range of problems. Every ML engineer should know these — they are faster, more interpretable, and often better than neural networks for structured/tabular data.</p>
+
+    <div class="algo-card">
+      <div class="algo-head"><div class="algo-num">01</div><div class="algo-name">Linear Regression</div><span class="badge b-green algo-tag">Supervised · Regression</span></div>
+      <div class="algo-body">Finds the best-fit line (or hyperplane) through data points. Predicts a continuous value. The simplest model — and often a surprisingly strong baseline. <strong>Core idea:</strong> minimise the sum of squared differences between predictions and actual values. Every weight is directly interpretable as "how much does this feature move the output?"</div>
+      <div class="algo-use">→ Use for: house prices, demand forecasting, any continuous output with linear relationships</div>
+    </div>
+
+    <div class="algo-card">
+      <div class="algo-head"><div class="algo-num">02</div><div class="algo-name">Logistic Regression</div><span class="badge b-blue algo-tag">Supervised · Classification</span></div>
+      <div class="algo-body">Despite the name, it is a <em>classification</em> algorithm. Outputs a probability (0 to 1) using the sigmoid function. Decision boundary: predict class 1 if probability > 0.5. <strong>Core idea:</strong> model the log-odds of the outcome as a linear function of features. Fast, interpretable, and often competitive with complex models.</div>
+      <div class="algo-use">→ Use for: spam detection, medical diagnosis, credit scoring, any binary yes/no outcome</div>
+    </div>
+
+    <div class="algo-card">
+      <div class="algo-head"><div class="algo-num">03</div><div class="algo-name">Decision Trees & Random Forests</div><span class="badge b-orange algo-tag">Supervised · Both</span></div>
+      <div class="algo-body">A decision tree asks a series of yes/no questions about features to reach a prediction — like a flowchart. Single trees overfit easily. A <strong>random forest</strong> trains hundreds of trees on random subsets of data and features, then averages their predictions. This ensemble dramatically reduces variance. <strong>XGBoost</strong> (gradient boosted trees) is the state-of-the-art for tabular data and wins most Kaggle competitions on structured data.</div>
+      <div class="algo-use">→ Use for: tabular/structured data, business intelligence, any dataset with mixed feature types</div>
+    </div>
+
+    <div class="algo-card">
+      <div class="algo-head"><div class="algo-num">04</div><div class="algo-name">Support Vector Machines (SVM)</div><span class="badge b-purple algo-tag">Supervised · Classification</span></div>
+      <div class="algo-body">Finds the hyperplane that maximally separates two classes — maximising the margin between them. The "support vectors" are the data points closest to the boundary. With the <strong>kernel trick</strong>, SVMs can learn non-linear boundaries by implicitly mapping data to higher dimensions. Powerful but does not scale well to very large datasets.</div>
+      <div class="algo-use">→ Use for: image classification (pre-deep learning), text classification, small-to-medium datasets</div>
+    </div>
+
+    <div class="algo-card">
+      <div class="algo-head"><div class="algo-num">05</div><div class="algo-name">K-Means Clustering</div><span class="badge b-red algo-tag">Unsupervised · Clustering</span></div>
+      <div class="algo-body">Groups data into K clusters by iteratively assigning each point to the nearest centroid, then recomputing centroids. No labels needed. <strong>Core idea:</strong> minimise the within-cluster sum of squared distances. Simple, scalable, but requires you to specify K in advance and assumes spherical clusters.</div>
+      <div class="algo-use">→ Use for: customer segmentation, document grouping, anomaly detection, image compression</div>
+    </div>
+
+    <div class="algo-card">
+      <div class="algo-head"><div class="algo-num">06</div><div class="algo-name">k-Nearest Neighbours (kNN)</div><span class="badge b-green algo-tag">Supervised · Both</span></div>
+      <div class="algo-body">The simplest possible learning algorithm: to classify a new point, find its k nearest training examples and take a vote. No training phase — all computation happens at inference. <strong>Core idea:</strong> similar inputs have similar outputs. Interpretable but slow for large datasets and breaks down in high-dimensional spaces (curse of dimensionality).</div>
+      <div class="algo-use">→ Use for: recommendation systems, anomaly detection, baseline comparisons</div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- CH9 -->
+  <div class="chapter" id="ch9">
+    <div class="ch-eyebrow">Chapter 09 · Algorithms</div>
+    <h2 class="ch-title">The three types of ML — <em>supervised, unsupervised, RL</em></h2>
+    <p class="ch-intro">These three paradigms differ fundamentally in what information is available during training and what the algorithm is optimising for.</p>
+
+    <div class="card" style="border-left:4px solid var(--accent2);">
+      <h4 class="label" style="margin-top:0;color:var(--accent2);">Supervised learning</h4>
+      <div class="body-text" style="margin-bottom:0.75rem;">You have labelled examples: (input, correct_output) pairs. The model learns a mapping from input to output by minimising prediction error. This is the dominant paradigm — most commercial AI is supervised. Requires labelled data, which is often the bottleneck.</div>
+      <div style="font-family:var(--mono);font-size:11px;color:var(--muted);">Examples: image classification, spam detection, price prediction, translation, LLMs (trained on next-token prediction — a self-supervised variant)</div>
+    </div>
+
+    <div class="card" style="border-left:4px solid var(--blue);">
+      <h4 class="label" style="margin-top:0;color:var(--blue);">Unsupervised learning</h4>
+      <div class="body-text" style="margin-bottom:0.75rem;">No labels. The model finds hidden structure — clusters, patterns, compressions, or representations — in unlabelled data. Often used as a preprocessing step (learning good representations) before supervised fine-tuning. Word embeddings (Word2Vec, GloVe) are a classic example.</div>
+      <div style="font-family:var(--mono);font-size:11px;color:var(--muted);">Examples: customer segmentation, topic modelling, anomaly detection, dimensionality reduction (PCA, t-SNE), generative models</div>
+    </div>
+
+    <div class="card" style="border-left:4px solid var(--purple);">
+      <h4 class="label" style="margin-top:0;color:var(--purple);">Reinforcement learning (RL)</h4>
+      <div class="body-text" style="margin-bottom:0.75rem;">An agent takes actions in an environment and receives rewards or penalties. The goal is to learn a policy — a mapping from state to action — that maximises cumulative reward over time. No labelled examples: the signal is entirely from the reward function. Notoriously difficult to train but capable of superhuman performance.</div>
+      <div style="font-family:var(--mono);font-size:11px;color:var(--muted);">Examples: AlphaGo/AlphaZero, robot locomotion, game playing, RLHF in LLMs (making models follow instructions and be safe)</div>
+    </div>
+
+    <div class="highlight-box"><strong>RLHF — how ChatGPT and Claude become "helpful":</strong> LLMs are first pretrained with self-supervised learning (predict the next word). Then humans rate outputs, training a reward model. Then RL fine-tunes the LLM to maximise the reward model's score. This Reinforcement Learning from Human Feedback (RLHF) is the step that turns a raw language model into an assistant that actually follows instructions.</div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- CH10 -->
+  <div class="chapter" id="ch10">
+    <div class="ch-eyebrow">Chapter 10 · Algorithms</div>
+    <h2 class="ch-title">Deep learning — <em>why depth matters</em></h2>
+    <p class="ch-intro">Deep learning is ML with neural networks containing many layers. The depth allows the model to learn hierarchical representations automatically — and this changes everything.</p>
+
+    <div class="body-text">The key insight of deep learning is the <strong>universal approximation theorem</strong>: a neural network with sufficient width and depth can approximate any continuous function to arbitrary precision. In practice, depth (many layers) is far more efficient than width (one very wide layer) for learning complex functions.</div>
+
+    <h3 class="sub">The major deep learning architectures</h3>
+    <table class="data-table">
+      <thead><tr><th>Architecture</th><th>Key innovation</th><th>Best for</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Convolutional Neural Networks (CNN)</strong></td><td>Convolutional filters share weights across spatial positions — detect features anywhere in an image.</td><td>Images, video, any spatial data</td></tr>
+        <tr><td><strong>Recurrent Neural Networks (RNN/LSTM)</strong></td><td>Hidden state carries information across time steps. Memory of sequences.</td><td>Sequential data, time series (now mostly replaced by Transformers)</td></tr>
+        <tr><td><strong>Transformers</strong></td><td>Self-attention: every token attends to every other token simultaneously. Scales massively.</td><td>Language, code, images (ViT), audio — the dominant architecture</td></tr>
+        <tr><td><strong>Generative Adversarial Networks (GAN)</strong></td><td>Two networks compete: generator creates fakes, discriminator detects them. Generator improves until indistinguishable.</td><td>Image synthesis, data augmentation</td></tr>
+        <tr><td><strong>Diffusion Models</strong></td><td>Learn to reverse a noise-addition process. Generates samples by iteratively denoising from random noise.</td><td>Image/audio generation — Stable Diffusion, DALL-E 3, Sora</td></tr>
+      </tbody>
+    </table>
+
+    <div class="highlight-box"><strong>Transfer learning — the most important practical insight in deep learning:</strong> You almost never train from scratch. A model pretrained on millions of images or billions of words already understands the world at a deep level. You <em>fine-tune</em> it on your specific task with far less data and compute. This is how 99% of real-world deep learning projects work. It's why Hugging Face exists.</div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- CH11 -->
+  <div class="chapter" id="ch11">
+    <div class="ch-eyebrow">Chapter 11 · Modern AI</div>
+    <h2 class="ch-title">Transformers & LLMs — <em>how ChatGPT and Claude work</em></h2>
+    <p class="ch-intro">The Transformer architecture (introduced in the 2017 paper "Attention Is All You Need") is the foundation of every major AI system today. Understanding it is essential for any AI engineer.</p>
+
+    <h3 class="sub">Self-attention — the core idea</h3>
+    <div class="body-text">In a sentence like "The animal didn't cross the street because it was too tired" — what does "it" refer to? Humans know it's the animal, not the street. Self-attention gives the model this ability: every word can look at every other word and decide how much to "attend" to it when building its own representation.</div>
+
+    <div class="flow-wrap">
+      <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;color:var(--muted);text-transform:uppercase;margin-bottom:1rem;">How a Transformer processes a sentence</div>
+      <div class="flow">
+        <div class="flow-node"><div class="flow-box fn-gray">Tokenise<br>input</div><div class="flow-sub">"the cat sat"<br>→ [1847,5765,9231]</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node"><div class="flow-box fn-blue">Token +<br>position<br>embedding</div><div class="flow-sub">turn IDs into<br>rich vectors</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node"><div class="flow-box fn-gold">Multi-head<br>self-attention<br>× N layers</div><div class="flow-sub">every token<br>attends to all</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node"><div class="flow-box fn-green">Feed-forward<br>network<br>per token</div><div class="flow-sub">refine each<br>representation</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node"><div class="flow-box fn-purple">Output<br>logits →<br>next token</div><div class="flow-sub">sample from<br>probability dist.</div></div>
+      </div>
+    </div>
+
+    <h3 class="sub">Attention visualised — what the model is "looking at"</h3>
+    <div class="body-text">Each head in multi-head attention learns to attend to different relationships. Here is a simplified attention map for a short sentence — darker cells mean stronger attention between two tokens:</div>
+
+    <div class="card">
+      <div id="attentionViz" style="overflow-x:auto;"></div>
+      <div style="font-size:11px;color:var(--muted);margin-top:0.75rem;font-family:var(--mono);">Darker = stronger attention weight. The model learns which words relate to which others.</div>
+    </div>
+
+    <h3 class="sub">How LLMs are trained — the full pipeline</h3>
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-left"><div class="tl-dot" style="background:#2d6a4f;"></div><div class="tl-line"></div></div>
+        <div class="tl-content"><div class="tl-year">Stage 1</div><div class="tl-name">Pretraining — self-supervised on massive text</div><div class="tl-desc">The model is trained to predict the next token across trillions of words from the internet, books, and code. No human labels needed — the data labels itself. This gives the model broad world knowledge and language structure. Requires enormous compute (weeks on thousands of GPUs).</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-left"><div class="tl-dot" style="background:#1a3a5c;"></div><div class="tl-line"></div></div>
+        <div class="tl-content"><div class="tl-year">Stage 2</div><div class="tl-name">Supervised fine-tuning (SFT)</div><div class="tl-desc">Human contractors write thousands of high-quality example conversations — "question: ... answer: ...". The model is fine-tuned on these to learn the format and style of being a helpful assistant. This is where "talking to an AI" behaviour comes from.</div></div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-left"><div class="tl-dot" style="background:#4a2d7a;"></div><div class="tl-line"></div></div>
+        <div class="tl-content"><div class="tl-year">Stage 3</div><div class="tl-name">RLHF — alignment via human preferences</div><div class="tl-desc">Humans rank pairs of model outputs (which is better?). A reward model is trained on these preferences. Then RL (PPO algorithm) fine-tunes the LLM to maximise the reward model's score. This is how Claude learns to be helpful, honest, and harmless — not just fluent.</div></div>
+      </div>
+    </div>
+
+    <div class="highlight-box"><strong>What LLMs don't do:</strong> They are not databases. They do not "look up" facts — they predict the statistically likely continuation of text based on training patterns. This is why they hallucinate. Understanding this is critical for building reliable AI applications — which is why RAG (Retrieval Augmented Generation) exists: you give the model the facts, and it reasons over them.</div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- CH12 -->
+  <div class="chapter" id="ch12">
+    <div class="ch-eyebrow">Chapter 12 · Modern AI</div>
+    <h2 class="ch-title">The end-to-end <em>ML pipeline</em></h2>
+    <p class="ch-intro">Real ML engineering is 20% modelling and 80% everything around it. The pipeline is where most projects succeed or fail.</p>
+
+    <div class="flow-wrap">
+      <div style="font-family:var(--mono);font-size:10px;letter-spacing:0.1em;color:var(--muted);text-transform:uppercase;margin-bottom:1.25rem;">Full ML pipeline</div>
+      <div class="flow">
+        <div class="flow-node"><div class="flow-box fn-gray">Problem<br>definition</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node"><div class="flow-box fn-blue">Data<br>collection</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node"><div class="flow-box fn-red">EDA &<br>cleaning</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node"><div class="flow-box fn-gold">Feature<br>engineering</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node"><div class="flow-box fn-green">Model<br>training</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node"><div class="flow-box fn-purple">Evaluation<br>& tuning</div></div>
+        <div class="flow-arrow">→</div>
+        <div class="flow-node"><div class="flow-box fn-gray">Deploy<br>& monitor</div></div>
+      </div>
+    </div>
+
+    <table class="data-table">
+      <thead><tr><th>Stage</th><th>What happens</th><th>Key tools</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Problem definition</strong></td><td>Define success metrics. What does "good" look like? What is the cost of errors? Often the hardest step.</td><td>Business context, stakeholder interviews</td></tr>
+        <tr><td><strong>Data collection</strong></td><td>Gather raw data from databases, APIs, scraping. Ensure it is representative, unbiased, and sufficient.</td><td>SQL, APIs, web scraping, data warehouses</td></tr>
+        <tr><td><strong>EDA & cleaning</strong></td><td>Exploratory data analysis: understand distributions, find missing values, outliers, data quality issues.</td><td>pandas, matplotlib, seaborn, Jupyter</td></tr>
+        <tr><td><strong>Feature engineering</strong></td><td>Transform raw data into features the model can use. Create new features, encode categoricals, normalise numerics.</td><td>scikit-learn pipelines, pandas</td></tr>
+        <tr><td><strong>Model training</strong></td><td>Select architecture, train on train set, tune hyperparameters on validation set. Track experiments.</td><td>scikit-learn, PyTorch, Keras, MLflow</td></tr>
+        <tr><td><strong>Evaluation & tuning</strong></td><td>Evaluate on held-out test set. If good enough, tune. If not, revisit data or features first.</td><td>Metrics, confusion matrices, Optuna</td></tr>
+        <tr><td><strong>Deploy & monitor</strong></td><td>Wrap model in API. Deploy to cloud. Monitor for data drift, performance degradation, and failures.</td><td>FastAPI, Docker, AWS/GCP, Grafana</td></tr>
+      </tbody>
+    </table>
+
+    <div class="danger-box"><strong>The most common pipeline failure:</strong> Training-serving skew. The model performs well in evaluation but poorly in production because the data it sees in production is distributed differently from training data. Preventing this requires careful logging, monitoring, and often retraining pipelines.</div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- CH13 -->
+  <div class="chapter" id="ch13">
+    <div class="ch-eyebrow">Chapter 13 · Modern AI</div>
+    <h2 class="ch-title">Evaluation metrics — <em>how you know if a model is good</em></h2>
+    <p class="ch-intro">Accuracy alone is almost always the wrong metric. Understanding which metric matches your business problem is a core engineering skill.</p>
+
+    <table class="data-table">
+      <thead><tr><th>Metric</th><th>Formula (simplified)</th><th>When to use</th><th>Watch out for</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Accuracy</strong></td><td>Correct / Total</td><td>Balanced classes, equal cost of errors</td><td>Useless on imbalanced datasets (95% accuracy detecting rare cancer = 0 useful)</td></tr>
+        <tr><td><strong>Precision</strong></td><td>True Pos / (True Pos + False Pos)</td><td>Cost of false positives is high (spam filter — don't delete real email)</td><td>Can be gamed by being very conservative</td></tr>
+        <tr><td><strong>Recall</strong></td><td>True Pos / (True Pos + False Neg)</td><td>Cost of false negatives is high (cancer screening — missing a case is catastrophic)</td><td>Can be gamed by predicting everything positive</td></tr>
+        <tr><td><strong>F1 Score</strong></td><td>Harmonic mean of precision and recall</td><td>Imbalanced classes where both precision and recall matter</td><td>Weights precision and recall equally — adjust with F-beta if they're not</td></tr>
+        <tr><td><strong>ROC-AUC</strong></td><td>Area under ROC curve</td><td>Ranking quality of binary classifier across all thresholds</td><td>Can be misleading on heavily imbalanced datasets</td></tr>
+        <tr><td><strong>RMSE</strong></td><td>√(mean squared error)</td><td>Regression problems — penalises large errors heavily</td><td>Sensitive to outliers</td></tr>
+        <tr><td><strong>MAE</strong></td><td>Mean absolute error</td><td>Regression — when outliers shouldn't dominate</td><td>Less differentiable than RMSE near zero</td></tr>
+        <tr><td><strong>Perplexity</strong></td><td>exp(cross-entropy loss)</td><td>Language models — how "surprised" the model is by data</td><td>Only comparable across models with the same tokenisation</td></tr>
+      </tbody>
+    </table>
+
+    <div class="highlight-box"><strong>Train / validation / test splits:</strong> Always split your data into three sets. Train on the training set. Tune hyperparameters on the validation set. Evaluate the final model exactly once on the test set. Evaluating on the test set during development leaks information and gives an optimistic — false — estimate of real-world performance.</div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- CH14 -->
+  <div class="chapter" id="ch14">
+    <div class="ch-eyebrow">Chapter 14 · Real world</div>
+    <h2 class="ch-title">ML in the real world — <em>applications and career map</em></h2>
+    <p class="ch-intro">ML is not an academic exercise. It is being deployed across every industry, creating roles that didn't exist five years ago and transforming existing ones.</p>
+
+    <h3 class="sub">Where ML is actually used today</h3>
+    <div class="three-col">
+      <div class="mini"><div class="m-title">Healthcare</div><div class="m-body">Medical imaging diagnosis, drug discovery, patient risk scoring, clinical trial design, genomics.</div></div>
+      <div class="mini"><div class="m-title">Finance</div><div class="m-body">Fraud detection, credit scoring, algorithmic trading, risk modelling, document processing.</div></div>
+      <div class="mini"><div class="m-title">Retail & e-commerce</div><div class="m-body">Recommendation engines, demand forecasting, dynamic pricing, inventory optimisation.</div></div>
+      <div class="mini"><div class="m-title">Manufacturing</div><div class="m-body">Predictive maintenance, quality control via vision, supply chain optimisation, robotics.</div></div>
+      <div class="mini"><div class="m-title">Technology</div><div class="m-body">Search ranking, content moderation, natural language interfaces, code generation, ad targeting.</div></div>
+      <div class="mini"><div class="m-title">Climate & science</div><div class="m-body">Weather forecasting (GraphCast), protein folding (AlphaFold), materials science, satellite imagery.</div></div>
+    </div>
+
+    <h3 class="sub">Career paths and what each requires</h3>
+    <table class="data-table">
+      <thead><tr><th>Role</th><th>Focus</th><th>Must know</th><th>Salary (global)</th></tr></thead>
+      <tbody>
+        <tr><td><strong>ML Engineer</strong></td><td>Build and deploy ML systems</td><td>Python, PyTorch, MLOps, APIs</td><td>$110K–$180K+</td></tr>
+        <tr><td><strong>Data Scientist</strong></td><td>Extract insights and build models</td><td>Statistics, Python, SQL, communication</td><td>$90K–$150K</td></tr>
+        <tr><td><strong>AI Engineer</strong></td><td>Build products using AI APIs</td><td>APIs, prompt engineering, RAG, agents</td><td>$95K–$165K</td></tr>
+        <tr><td><strong>MLOps Engineer</strong></td><td>Keep ML systems running at scale</td><td>DevOps, Docker, cloud, monitoring</td><td>$120K–$190K</td></tr>
+        <tr><td><strong>Research Scientist</strong></td><td>Advance the field</td><td>Deep ML theory, PhD often needed</td><td>$150K–$300K+</td></tr>
+        <tr><td><strong>AI Product Manager</strong></td><td>Shape AI products</td><td>Business sense, AI literacy, user empathy</td><td>$100K–$170K</td></tr>
+      </tbody>
+    </table>
+
+    <div class="card-dark">
+      <div class="cd-title">Your path from here</div>
+      <p>You now understand how ML works from the ground up — from gradient descent and backpropagation through transformers and LLMs. The next step is converting this understanding into building ability. That means writing real code: start with scikit-learn on a Kaggle dataset, then move to PyTorch, then to building with LLM APIs. Theory without building is incomplete. Building without theory leads to guessing. You now have the theory — go build something.</p>
+    </div>
+  </div>
+
+</main>
+
+<script>
+// Sidebar active state on scroll
+const sections = document.querySelectorAll('.chapter[id]');
+const links = document.querySelectorAll('.sb-link');
+function updateActive() {
+  let current = '';
+  sections.forEach(s => { if (window.scrollY >= s.offsetTop - 120) current = s.id; });
+  links.forEach(l => {
+    l.classList.remove('active');
+    if (l.getAttribute('href') === '#' + current) l.classList.add('active');
+  });
+}
+window.addEventListener('scroll', updateActive, { passive: true });
+
+// ——— Gradient Descent Demo ———
+let gdW = 3.5, gdIter = 0, gdAuto = null;
+const GD_LR = 0.08;
+
+function gdLossAt(w) {
+  return 0.6 * Math.pow(w - 1, 2) + 0.15 * Math.pow(w - 1, 4) + 0.05 * Math.sin(w * 3) * Math.pow(w, 2);
+}
+
+function gdGradAt(w) {
+  return 1.2 * (w - 1) + 0.6 * Math.pow(w - 1, 3) + 0.15 * Math.cos(w * 3) * w * 2 + 0.05 * Math.sin(w * 3) * 2;
+}
+
+var gdTrail = [];
+
+function gdDraw() {
+  const canvas = document.getElementById('gdCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.clientWidth, H = 220;
+  canvas.width = W; canvas.height = H;
+  ctx.fillStyle = '#fafaf7';
+  ctx.fillRect(0, 0, W, H);
+  const wMin = -1, wMax = 5;
+  const lMin = -0.1, lMax = 8;
+  const px = w => (w - wMin) / (wMax - wMin) * (W - 60) + 30;
+  const py = l => H - 20 - (l - lMin) / (lMax - lMin) * (H - 50);
+
+  // Grid
+  ctx.strokeStyle = 'rgba(0,0,0,0.04)'; ctx.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) {
+    const x = 30 + i * (W - 60) / 4;
+    ctx.beginPath(); ctx.moveTo(x, 15); ctx.lineTo(x, H - 15); ctx.stroke();
+    const y = 20 + i * (H - 50) / 4;
+    ctx.beginPath(); ctx.moveTo(25, y); ctx.lineTo(W - 20, y); ctx.stroke();
+  }
+
+  // Loss curve
+  ctx.beginPath(); ctx.strokeStyle = '#2d6a4f'; ctx.lineWidth = 2.5;
+  for (let i = 0; i <= 200; i++) {
+    const w = wMin + i / 200 * (wMax - wMin);
+    const l = gdLossAt(w);
+    const x = px(w), y = py(l);
+    i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+
+  // Trail
+  for (let i = 0; i < gdTrail.length; i++) {
+    const t = gdTrail[i];
+    ctx.beginPath();
+    ctx.arc(px(t.w), py(t.l), 4, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(180,155,80,0.35)';
+    ctx.fill();
+  }
+
+  // Current point
+  const curL = gdLossAt(gdW);
+  ctx.beginPath();
+  ctx.arc(px(gdW), py(curL), 7, 0, Math.PI * 2);
+  ctx.fillStyle = '#c0392b';
+  ctx.fill();
+  ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // Axis labels
+  ctx.fillStyle = '#7a7268'; ctx.font = '10px IBM Plex Mono, monospace';
+  ctx.fillText('weight (w)', W / 2 - 25, H - 3);
+  ctx.save(); ctx.translate(10, H / 2); ctx.rotate(-Math.PI / 2);
+  ctx.fillText('loss', -14, 0); ctx.restore();
+}
+
+function gdStep() {
+  gdTrail.push({ w: gdW, l: gdLossAt(gdW) });
+  if (gdTrail.length > 40) gdTrail.shift();
+  const grad = gdGradAt(gdW);
+  gdW -= GD_LR * grad;
+  gdW = Math.max(-0.8, Math.min(4.8, gdW));
+  gdIter++;
+  document.getElementById('gdIter').textContent = gdIter;
+  document.getElementById('gdLoss').textContent = gdLossAt(gdW).toFixed(4);
+  document.getElementById('gdPos').textContent = gdW.toFixed(3);
+  gdDraw();
+}
+
+function gdToggleAuto() {
+  if (gdAuto) {
+    clearInterval(gdAuto); gdAuto = null;
+    document.getElementById('gdAutoBtn').textContent = 'Auto descend';
+  } else {
+    document.getElementById('gdAutoBtn').textContent = 'Stop';
+    gdAuto = setInterval(function() {
+      if (gdIter >= 80) { clearInterval(gdAuto); gdAuto = null; document.getElementById('gdAutoBtn').textContent = 'Auto descend'; return; }
+      gdStep();
+    }, 60);
+  }
+}
+
+function gdReset() {
+  if (gdAuto) { clearInterval(gdAuto); gdAuto = null; document.getElementById('gdAutoBtn').textContent = 'Auto descend'; }
+  gdW = 3.5 + (Math.random() - 0.5) * 0.5;
+  gdIter = 0; gdTrail = [];
+  document.getElementById('gdIter').textContent = 0;
+  document.getElementById('gdLoss').textContent = '—';
+  document.getElementById('gdPos').textContent = '—';
+  gdDraw();
+}
+
+gdDraw();
+
+// ——— Overfitting Canvases ———
+function drawFitCanvas(id, type) {
+  const c = document.getElementById(id);
+  if (!c) return;
+  const ctx = c.getContext('2d');
+  const W = c.width, H = c.height;
+  ctx.fillStyle = '#fafaf7';
+  ctx.fillRect(0, 0, W, H);
+  const pts = [];
+  for (let i = 0; i < 10; i++) {
+    const x = 15 + i * (W - 30) / 9;
+    const y = H - 20 - (0.4 * i + 1.5 + (Math.random() - 0.5) * 1.8) * 10;
+    pts.push({ x, y });
+  }
+  // Draw points
+  pts.forEach(p => {
+    ctx.beginPath(); ctx.arc(p.x, p.y, 3.5, 0, Math.PI * 2);
+    ctx.fillStyle = '#1a3a5c'; ctx.fill();
+  });
+  // Draw fit line
+  ctx.beginPath(); ctx.lineWidth = 2; ctx.setLineDash([]);
+  if (type === 'under') {
+    ctx.strokeStyle = '#c0392b';
+    ctx.moveTo(pts[0].x, H / 2 - 5); ctx.lineTo(pts[9].x, H / 2 - 5);
+  } else if (type === 'good') {
+    ctx.strokeStyle = '#2d6a4f';
+    const avg = pts.reduce((s, p) => s + p.y, 0) / pts.length;
+    const dx = pts[9].x - pts[0].x, dy = pts[9].y - pts[0].y;
+    ctx.moveTo(pts[0].x, pts[0].y + 8); ctx.lineTo(pts[9].x, pts[9].y + 8);
+  } else {
+    ctx.strokeStyle = '#c0392b';
+    ctx.moveTo(pts[0].x, pts[0].y);
+    for (let i = 1; i < pts.length; i++) {
+      ctx.bezierCurveTo(pts[i-1].x + 8, pts[i-1].y - 12, pts[i].x - 8, pts[i].y + 12, pts[i].x, pts[i].y);
+    }
+  }
+  ctx.stroke();
+}
+drawFitCanvas('fitUnder', 'under');
+drawFitCanvas('fitGood', 'good');
+drawFitCanvas('fitOver', 'over');
+
+// ——— Attention Visualization ———
+function buildAttention() {
+  const tokens = ['The', 'cat', 'sat', 'on', 'mat'];
+  const weights = [
+    [0.6, 0.3, 0.05, 0.03, 0.02],
+    [0.15, 0.55, 0.15, 0.08, 0.07],
+    [0.1, 0.3, 0.4, 0.1, 0.1],
+    [0.05, 0.1, 0.15, 0.5, 0.2],
+    [0.05, 0.1, 0.2, 0.25, 0.4]
+  ];
+  const container = document.getElementById('attentionViz');
+  if (!container) return;
+  let html = '<div style="display:inline-block;min-width:300px;">';
+  html += '<div style="display:flex;gap:3px;margin-bottom:3px;padding-left:52px;">';
+  tokens.forEach(t => { html += '<div style="flex:1;text-align:center;font-family:var(--mono);font-size:10px;color:var(--muted);min-width:40px;">' + t + '</div>'; });
+  html += '</div>';
+  weights.forEach((row, i) => {
+    html += '<div style="display:flex;gap:3px;margin-bottom:3px;align-items:center;">';
+    html += '<div style="font-family:var(--mono);font-size:10px;color:var(--muted);width:48px;text-align:right;padding-right:6px;">' + tokens[i] + '</div>';
+    row.forEach(w => {
+      const a = Math.round(w * 255);
+      const bg = 'rgba(26,58,42,' + w.toFixed(2) + ')';
+      const fg = w > 0.3 ? '#fff' : '#1a3a2a';
+      html += '<div style="flex:1;min-width:40px;height:28px;border-radius:4px;background:' + bg + ';display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:9px;color:' + fg + ';font-weight:500;">' + w.toFixed(2) + '</div>';
+    });
+    html += '</div>';
+  });
+  html += '</div>';
+  container.innerHTML = html;
+}
+buildAttention();
+
+window.addEventListener('resize', function() { gdDraw(); });
+</script>
+</body>
+</html>
